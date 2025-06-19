@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sales & Expenses Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Sales & Expenses Tracker</h1>
+
+  <!-- Form to Add/Edit Records -->
+  <form id="recordForm">
+    <input type="hidden" id="recordId">
+    <label>Date: <input type="date" id="date" required></label>
+    <label>Sales: <input type="number" id="sales" required></label>
+    <label>Expenses: <input type="number" id="expenses" required></label>
+    <button type="submit">Save Record</button>
+    <button type="button" id="cancelEdit" style="display:none;">Cancel</button>
+  </form>
+
+  <!-- Date Filter -->
+  <div class="filters">
+    <label>Start: <input type="date" id="startDate"></label>
+    <label>End: <input type="date" id="endDate"></label>
+    <button onclick="fetchRecords()">Update Graph</button>
+  </div>
+
+  <!-- Layout: Chart & Table -->
+  <div class="content">
+    <div class="chart-container">
+      <canvas id="lineChart"></canvas>
+    </div>
+
+    <div class="table-container">
+      <h2>Daily Records</h2>
+      <table id="recordTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Sales (₱)</th>
+            <th>Expenses (₱)</th>
+            <th>Profit (₱)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- Summary -->
+      <div id="summary">
+        <p>Total Sales: ₱<span id="totalSales">0</span></p>
+        <p>Total Expenses: ₱<span id="totalExpenses">0</span></p>
+        <p>Profit: ₱<span id="profit">0</span></p>
+        <p>Average Sales: ₱<span id="averageSales">0</span></p>
+        <p>Average Expenses: ₱<span id="averageExpenses">0</span></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
