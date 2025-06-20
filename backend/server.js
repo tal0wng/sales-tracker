@@ -1,34 +1,38 @@
-// backend/server.js
-require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err));
+  .catch(err => console.error("❌ MongoDB connection error:", err));
 
+// Schema and model
 const DataSchema = new mongoose.Schema({
   date: Date,
   sales: Number,
-  expenses: Number,
+  expenses: Number
 });
 
 const Data = mongoose.model("Data", DataSchema);
 
+// Routes
 app.get("/api/data", async (req, res) => {
-  const all = await Data.find();
-  res.json(all);
+  const data = await Data.find();
+  res.json(data);
 });
 
 app.post("/api/data", async (req, res) => {
-  const entry = new Data(req.body);
-  await entry.save();
-  res.json(entry);
+  const newData = new Data(req.body);
+  const saved = await newData.save();
+  res.json(saved);
 });
 
 app.put("/api/data/:id", async (req, res) => {
@@ -38,7 +42,11 @@ app.put("/api/data/:id", async (req, res) => {
 
 app.delete("/api/data/:id", async (req, res) => {
   await Data.findByIdAndDelete(req.params.id);
-  res.sendStatus(204);
+  res.json({ message: "Deleted" });
+});
+
+app.get("/", (req, res) => {
+  res.send("Sales Tracker API is live");
 });
 
 const PORT = process.env.PORT || 5000;
