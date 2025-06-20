@@ -1,28 +1,44 @@
-const express = require('express');
+// 🔧 backend/routes/records.js
+const express = require("express");
 const router = express.Router();
-const Record = require('../models/Record');
+const Record = require("../models/Record");
 
-// Create a record
-router.post('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const record = new Record(req.body);
-    await record.save();
-    res.json(record);
+    const records = await Record.find().sort({ date: 1 });
+    res.json(records);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Failed to fetch records" });
   }
 });
 
-// Get records by date range
-router.get('/', async (req, res) => {
-  const { start, end } = req.query;
+router.post("/", async (req, res) => {
   try {
-    const records = await Record.find({
-      date: { $gte: new Date(start), $lte: new Date(end) }
-    }).sort({ date: 1 });
-    res.json(records);
+    const newRecord = new Record(req.body);
+    await newRecord.save();
+    res.status(201).json(newRecord);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: "Invalid data" });
+  }
+});
+
+router.put("/:id", async (req, res) => {
+  try {
+    const updated = await Record.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: "Failed to update record" });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    await Record.findByIdAndDelete(req.params.id);
+    res.sendStatus(204);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete record" });
   }
 });
 
