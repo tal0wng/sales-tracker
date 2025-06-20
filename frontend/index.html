@@ -1,44 +1,45 @@
-<!-- 📄 frontend/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Sales Tracker</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sales & Expenses Tracker</title>
+  <link rel="stylesheet" href="style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    #chart-container { width: 100%; max-width: 800px; margin: auto; }
-    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }
-    table { width: 100%; margin-top: 20px; }
-    button { margin: 0 2px; }
-    #gauge { height: 20px; margin: 10px 0; transition: background-color 0.3s; }
-    form input { margin: 5px; }
-  </style>
 </head>
 <body>
-  <h1>📊 Sales Tracker</h1>
+  <h1>Sales & Expenses Tracker</h1>
 
-  <form id="data-form" onsubmit="addData(); return false;">
-    <input type="date" id="date" required>
-    <input type="number" id="sales" placeholder="Sales (₱)" required>
-    <input type="number" id="expenses" placeholder="Expenses (₱)" required>
-    <button type="submit" id="submit-btn">Add</button>
-    <button type="button" id="update-btn" onclick="updateData()" style="display:none;">Update</button>
+  <form id="data-form">
+    <label for="date">Date:</label>
+    <input type="date" id="date" required />
+    <input type="number" id="sales" placeholder="Sales" required />
+    <input type="number" id="expenses" placeholder="Expenses" required />
+    <button type="button" onclick="addData()" id="submit-btn">Save Record</button>
+    <button type="button" onclick="updateData()" id="update-btn" style="display:none;">Update Record</button>
   </form>
 
-  <div id="gauge"></div>
-  <div id="summary"></div>
-
-  <div id="chart-container">
-    <canvas id="chart"></canvas>
+  <div class="filter">
+    <label>Start:</label>
+    <input type="date" id="startDate"/>
+    <label>End:</label>
+    <input type="date" id="endDate"/>
+    <button onclick="loadData()">Update Graph</button>
   </div>
 
+  <canvas id="chart" width="600" height="300"></canvas>
+
+  <div id="summary" class="summary-box"></div>
+  <div id="gauge" class="gauge-box"></div>
+
+  <h2>Daily Records</h2>
   <table>
     <thead>
       <tr>
         <th>Date</th>
-        <th>Sales</th>
-        <th>Expenses</th>
+        <th>Sales (₱)</th>
+        <th>Expenses (₱)</th>
+        <th>Profit (₱)</th>
         <th>Actions</th>
       </tr>
     </thead>
