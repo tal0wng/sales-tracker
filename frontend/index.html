@@ -15,16 +15,20 @@
     <input type="date" id="date" required />
     <input type="number" id="sales" placeholder="Sales" required />
     <input type="number" id="expenses" placeholder="Expenses" required />
+    <label><input type="checkbox" id="collectable" /> Unpaid Laundry</label>
+    <input type="text" id="remarks" placeholder="Remarks" />
     <button type="button" onclick="addData()" id="submit-btn">Save Record</button>
     <button type="button" onclick="updateData()" id="update-btn" style="display:none;">Update Record</button>
   </form>
 
   <div class="filter">
-    <label>Start:</label>
-    <input type="date" id="startDate"/>
-    <label>End:</label>
-    <input type="date" id="endDate"/>
-    <button onclick="loadData()">Update Graph</button>
+    <label for="sortBy">Sort By:</label>
+    <select id="sortBy" onchange="loadData()">
+      <option value="">Default</option>
+      <option value="sales">Sales</option>
+      <option value="expenses">Expenses</option>
+      <option value="profit">Profit</option>
+    </select>
   </div>
 
   <canvas id="chart" width="600" height="300"></canvas>
