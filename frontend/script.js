@@ -7,17 +7,8 @@ async function loadData() {
   const res = await fetch(`${API_URL}/api/data`);
   let data = await res.json();
 
-  const sortBy = document.getElementById("sort-select")?.value || "date";
-  data.sort((a, b) => {
-    if (sortBy === "sales") return b.sales - a.sales;
-    if (sortBy === "expenses") return b.expenses - a.expenses;
-    if (sortBy === "profit") return (b.sales - b.expenses) - (a.sales - a.expenses);
-    return new Date(a.date) - new Date(b.date);
-  });
-
   const sales = data.map(d => d.sales);
   const expenses = data.map(d => d.expenses);
-  const profit = data.map(d => d.sales - d.expenses);
   const labels = data.map(d => new Date(d.date).toLocaleDateString());
 
   if (window.myChart) window.myChart.destroy();
@@ -54,13 +45,10 @@ async function loadData() {
   tableBody.innerHTML = "";
   data.forEach(item => {
     const tr = document.createElement("tr");
-    tr.title = item.remarks || "";
-    if (item.unpaidLaundry) tr.classList.add("pending");
     tr.innerHTML = `
       <td>${new Date(item.date).toLocaleDateString()}</td>
       <td>₱${item.sales}</td>
       <td>₱${item.expenses}</td>
-      <td>${item.unpaidLaundry ? "Pending Laundry" : "Paid"}</td>
       <td>
         <button onclick="editEntry('${item._id}')">✏️</button>
         <button onclick="deleteEntry('${item._id}')">🗑️</button>
@@ -74,13 +62,11 @@ async function addData() {
   const date = document.getElementById("date").value;
   const sales = document.getElementById("sales").value;
   const expenses = document.getElementById("expenses").value;
-  const remarks = document.getElementById("remarks").value;
-  const unpaidLaundry = document.getElementById("unpaid-laundry").checked;
 
   await fetch(`${API_URL}/api/data`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ date, sales, expenses, remarks, unpaidLaundry })
+    body: JSON.stringify({ date, sales, expenses })
   });
 
   document.getElementById("data-form").reset();
@@ -102,8 +88,6 @@ async function editEntry(id) {
   document.getElementById("date").value = entry.date.split("T")[0];
   document.getElementById("sales").value = entry.sales;
   document.getElementById("expenses").value = entry.expenses;
-  document.getElementById("remarks").value = entry.remarks || "";
-  document.getElementById("unpaid-laundry").checked = entry.unpaidLaundry;
   editId = id;
 
   document.getElementById("submit-btn").style.display = "none";
@@ -114,13 +98,11 @@ async function updateData() {
   const date = document.getElementById("date").value;
   const sales = document.getElementById("sales").value;
   const expenses = document.getElementById("expenses").value;
-  const remarks = document.getElementById("remarks").value;
-  const unpaidLaundry = document.getElementById("unpaid-laundry").checked;
 
   await fetch(`${API_URL}/api/data/${editId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ date, sales, expenses, remarks, unpaidLaundry })
+    body: JSON.stringify({ date, sales, expenses })
   });
 
   document.getElementById("data-form").reset();

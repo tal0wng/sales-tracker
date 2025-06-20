@@ -1,39 +1,37 @@
+<!-- 📄 frontend/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Sales Tracker</title>
-  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #chart-container { width: 100%; max-width: 800px; margin: auto; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }
+    table { width: 100%; margin-top: 20px; }
+    button { margin: 0 2px; }
+    #gauge { height: 20px; margin: 10px 0; transition: background-color 0.3s; }
+    form input { margin: 5px; }
+  </style>
 </head>
 <body>
-  <h1>Sales Tracker</h1>
+  <h1>📊 Sales Tracker</h1>
 
-  <form id="data-form" onsubmit="event.preventDefault(); addData();">
-    <input type="date" id="date" required />
-    <input type="number" id="sales" placeholder="Sales" required />
-    <input type="number" id="expenses" placeholder="Expenses" required />
-    <input type="text" id="remarks" placeholder="Remarks (optional)" />
-    <label>
-      <input type="checkbox" id="unpaid-laundry" /> Unpaid Laundry
-    </label>
-    <button id="submit-btn" type="submit">Add</button>
-    <button id="update-btn" type="button" style="display: none" onclick="updateData()">Update</button>
+  <form id="data-form" onsubmit="addData(); return false;">
+    <input type="date" id="date" required>
+    <input type="number" id="sales" placeholder="Sales (₱)" required>
+    <input type="number" id="expenses" placeholder="Expenses (₱)" required>
+    <button type="submit" id="submit-btn">Add</button>
+    <button type="button" id="update-btn" onclick="updateData()" style="display:none;">Update</button>
   </form>
 
+  <div id="gauge"></div>
   <div id="summary"></div>
 
-  <div id="gauge" style="padding: 10px; margin: 10px 0; font-weight: bold;">Profit Status</div>
-
-  <label for="sort-select">Sort by:</label>
-  <select id="sort-select" onchange="loadData()">
-    <option value="date">Date</option>
-    <option value="sales">Sales</option>
-    <option value="expenses">Expenses</option>
-    <option value="profit">Profit</option>
-  </select>
-
-  <canvas id="chart" width="400" height="200"></canvas>
+  <div id="chart-container">
+    <canvas id="chart"></canvas>
+  </div>
 
   <table>
     <thead>
@@ -41,14 +39,12 @@
         <th>Date</th>
         <th>Sales</th>
         <th>Expenses</th>
-        <th>Status</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody id="records"></tbody>
   </table>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
