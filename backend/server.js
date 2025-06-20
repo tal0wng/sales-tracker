@@ -1,14 +1,17 @@
 // backend/server.js
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB model
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB error:", err));
+
 const DataSchema = new mongoose.Schema({
   date: Date,
   sales: Number,
@@ -17,12 +20,6 @@ const DataSchema = new mongoose.Schema({
 
 const Data = mongoose.model("Data", DataSchema);
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err));
-
-// Routes
 app.get("/api/data", async (req, res) => {
   const all = await Data.find();
   res.json(all);
@@ -44,6 +41,7 @@ app.delete("/api/data/:id", async (req, res) => {
   res.sendStatus(204);
 });
 
-// Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
