@@ -1,3 +1,4 @@
+// 🔧 frontend/script.js
 const API_URL = "https://sales-tracker-api.onrender.com";
 
 let editId = null;
@@ -10,19 +11,31 @@ async function loadData() {
   const expenses = data.map(d => d.expenses);
   const labels = data.map(d => new Date(d.date).toLocaleDateString());
 
+  // Chart
   if (window.myChart) window.myChart.destroy();
   const ctx = document.getElementById("chart").getContext("2d");
   window.myChart = new Chart(ctx, {
-    type: "bar",
+    type: "line",
     data: {
       labels,
       datasets: [
-        { label: "Sales", data: sales, backgroundColor: "#4caf50" },
-        { label: "Expenses", data: expenses, backgroundColor: "#f44336" }
+        {
+          label: "Sales",
+          data: sales,
+          borderColor: "green",
+          fill: false
+        },
+        {
+          label: "Expenses",
+          data: expenses,
+          borderColor: "red",
+          fill: false
+        }
       ]
     }
   });
 
+  // Summary
   const totalSales = sales.reduce((a, b) => a + b, 0);
   const totalExpenses = expenses.reduce((a, b) => a + b, 0);
   const profitTotal = totalSales - totalExpenses;
@@ -37,19 +50,22 @@ async function loadData() {
     <p><strong>Average Expenses:</strong> ₱${avgExpenses}</p>
   `;
 
+  // Color Gauge
   const gauge = document.getElementById("gauge");
-  gauge.style.backgroundColor = profitTotal > 0 ? "lightgreen" : profitTotal < 0 ? "lightcoral" : "lightgray";
+  gauge.style.backgroundColor =
+    profitTotal > 0 ? "lightgreen" : profitTotal < 0 ? "lightcoral" : "lightgray";
 
+  // Table
   const tableBody = document.getElementById("records");
   tableBody.innerHTML = "";
   data.forEach(item => {
-    const profit = item.sales - item.expenses;
     const tr = document.createElement("tr");
+    const profit = item.sales - item.expenses;
     tr.innerHTML = `
       <td>${new Date(item.date).toLocaleDateString()}</td>
-      <td>₱${item.sales}</td>
-      <td>₱${item.expenses}</td>
-      <td>₱${profit}</td>
+      <td>₱${item.sales.toFixed(2)}</td>
+      <td>₱${item.expenses.toFixed(2)}</td>
+      <td>₱${profit.toFixed(2)}</td>
       <td>
         <button onclick="editEntry('${item._id}')">✏️</button>
         <button onclick="deleteEntry('${item._id}')">🗑️</button>
@@ -61,8 +77,8 @@ async function loadData() {
 
 async function addData() {
   const date = document.getElementById("date").value;
-  const sales = document.getElementById("sales").value;
-  const expenses = document.getElementById("expenses").value;
+  const sales = parseFloat(document.getElementById("sales").value);
+  const expenses = parseFloat(document.getElementById("expenses").value);
 
   await fetch(`${API_URL}/api/data`, {
     method: "POST",
@@ -97,8 +113,8 @@ async function editEntry(id) {
 
 async function updateData() {
   const date = document.getElementById("date").value;
-  const sales = document.getElementById("sales").value;
-  const expenses = document.getElementById("expenses").value;
+  const sales = parseFloat(document.getElementById("sales").value);
+  const expenses = parseFloat(document.getElementById("expenses").value);
 
   await fetch(`${API_URL}/api/data/${editId}`, {
     method: "PUT",
