@@ -1,4 +1,4 @@
-// 📁 backend/server.js
+// backend/server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -8,34 +8,30 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// MongoDB model
 const DataSchema = new mongoose.Schema({
   date: Date,
   sales: Number,
-  expenses: Number
+  expenses: Number,
 });
 
 const Data = mongoose.model("Data", DataSchema);
 
-// Connect to MongoDB
+// MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error("❌ MongoDB error:", err));
+  .catch((err) => console.error("❌ MongoDB error:", err));
 
 // Routes
 app.get("/api/data", async (req, res) => {
-  const data = await Data.find();
-  res.json(data);
+  const all = await Data.find();
+  res.json(all);
 });
 
 app.post("/api/data", async (req, res) => {
-  const newData = new Data(req.body);
-  await newData.save();
-  res.json(newData);
-});
-
-app.delete("/api/data/:id", async (req, res) => {
-  await Data.findByIdAndDelete(req.params.id);
-  res.sendStatus(204);
+  const entry = new Data(req.body);
+  await entry.save();
+  res.json(entry);
 });
 
 app.put("/api/data/:id", async (req, res) => {
@@ -43,5 +39,11 @@ app.put("/api/data/:id", async (req, res) => {
   res.json(updated);
 });
 
+app.delete("/api/data/:id", async (req, res) => {
+  await Data.findByIdAndDelete(req.params.id);
+  res.sendStatus(204);
+});
+
+// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
