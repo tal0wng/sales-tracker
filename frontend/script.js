@@ -1,71 +1,66 @@
-const API_URL = "https://sales-tracker-api.onrender.com"; // your live backend URL
+// 🔧 frontend/script.js
+const API_URL = "https://sales-tracker-api.onrender.com";
 
-// Fetch and display data
+let editId = null;
+
 async function loadData() {
   const res = await fetch(`${API_URL}/api/data`);
-  const data = await res.json();
+  let data = await res.json();
 
-  const sales = data.map(item => item.sales);
-  const expenses = data.map(item => item.expenses);
-  const profit = data.map(item => item.sales - item.expenses);
-  const labels = data.map(item => new Date(item.date).toLocaleDateString());
+  const sortBy = document.getElementById("sort-select")?.value || "date";
+  data.sort((a, b) => {
+    if (sortBy === "sales") return b.sales - a.sales;
+    if (sortBy === "expenses") return b.expenses - a.expenses;
+    if (sortBy === "profit") return (b.sales - b.expenses) - (a.sales - a.expenses);
+    return new Date(a.date) - new Date(b.date);
+  });
 
-  // Render Bar Chart
-  const ctx = document.getElementById("chart").getContext("2d");
+  const sales = data.map(d => d.sales);
+  const expenses = data.map(d => d.expenses);
+  const profit = data.map(d => d.sales - d.expenses);
+  const labels = data.map(d => new Date(d.date).toLocaleDateString());
+
   if (window.myChart) window.myChart.destroy();
+  const ctx = document.getElementById("chart").getContext("2d");
   window.myChart = new Chart(ctx, {
     type: "bar",
     data: {
       labels,
       datasets: [
-        {
-          label: "Sales",
-          data: sales,
-          backgroundColor: "rgba(54, 162, 235, 0.6)",
-        },
-        {
-          label: "Expenses",
-          data: expenses,
-          backgroundColor: "rgba(255, 99, 132, 0.6)",
-        },
-      ],
-    },
+        { label: "Sales", data: sales, backgroundColor: "#4caf50" },
+        { label: "Expenses", data: expenses, backgroundColor: "#f44336" }
+      ]
+    }
   });
 
-  // Calculate and show summary
   const totalSales = sales.reduce((a, b) => a + b, 0);
   const totalExpenses = expenses.reduce((a, b) => a + b, 0);
-  const averageSales = (totalSales / sales.length).toFixed(2);
-  const averageExpenses = (totalExpenses / expenses.length).toFixed(2);
   const profitTotal = totalSales - totalExpenses;
+  const avgSales = (totalSales / sales.length || 0).toFixed(2);
+  const avgExpenses = (totalExpenses / expenses.length || 0).toFixed(2);
 
   document.getElementById("summary").innerHTML = `
     <p><strong>Total Sales:</strong> ₱${totalSales}</p>
     <p><strong>Total Expenses:</strong> ₱${totalExpenses}</p>
-    <p><strong>Average Sales:</strong> ₱${averageSales}</p>
-    <p><strong>Average Expenses:</strong> ₱${averageExpenses}</p>
+    <p><strong>Average Sales:</strong> ₱${avgSales}</p>
+    <p><strong>Average Expenses:</strong> ₱${avgExpenses}</p>
     <p><strong>Profit:</strong> ₱${profitTotal}</p>
   `;
 
-  // Update Profit Gauge
   const gauge = document.getElementById("gauge");
-  if (profitTotal > 0) {
-    gauge.style.backgroundColor = "lightgreen";
-  } else if (profitTotal < 0) {
-    gauge.style.backgroundColor = "lightcoral";
-  } else {
-    gauge.style.backgroundColor = "lightgray";
-  }
+  gauge.style.backgroundColor = profitTotal > 0 ? "lightgreen" : profitTotal < 0 ? "lightcoral" : "lightgray";
 
-  // Populate records table
   const tableBody = document.getElementById("records");
   tableBody.innerHTML = "";
   data.forEach(item => {
     const tr = document.createElement("tr");
+    tr.title = item.remarks || "";
+    if (item.unpaidLaundry) tr.classList.add("pending");
     tr.innerHTML = `
       <td>${new Date(item.date).toLocaleDateString()}</td>
       <td>₱${item.sales}</td>
       <td>₱${item.expenses}</td>
+      <td>${item.unpaidLaundry ? "Pending Laundry" : "Paid"}</td>
       <td>
         <button onclick="editEntry('${item._id}')">✏️</button>
         <button onclick="deleteEntry('${item._id}')">🗑️</button>
@@ -75,44 +70,40 @@ async function loadData() {
   });
 }
 
-// Add new record
 async function addData() {
   const date = document.getElementById("date").value;
   const sales = document.getElementById("sales").value;
   const expenses = document.getElementById("expenses").value;
-
-  if (!date || !sales || !expenses) return alert("Please complete the form.");
+  const remarks = document.getElementById("remarks").value;
+  const unpaidLaundry = document.getElementById("unpaid-laundry").checked;
 
   await fetch(`${API_URL}/api/data`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ date, sales, expenses }),
+    body: JSON.stringify({ date, sales, expenses, remarks, unpaidLaundry })
   });
 
   document.getElementById("data-form").reset();
   loadData();
 }
 
-// Delete record
 async function deleteEntry(id) {
-  if (confirm("Are you sure you want to delete this entry?")) {
+  if (confirm("Delete this record?")) {
     await fetch(`${API_URL}/api/data/${id}`, { method: "DELETE" });
     loadData();
   }
 }
 
-// Edit record (prefill form and update)
-let editId = null;
-
 async function editEntry(id) {
   const res = await fetch(`${API_URL}/api/data`);
   const data = await res.json();
   const entry = data.find(d => d._id === id);
-  if (!entry) return;
 
   document.getElementById("date").value = entry.date.split("T")[0];
   document.getElementById("sales").value = entry.sales;
   document.getElementById("expenses").value = entry.expenses;
+  document.getElementById("remarks").value = entry.remarks || "";
+  document.getElementById("unpaid-laundry").checked = entry.unpaidLaundry;
   editId = id;
 
   document.getElementById("submit-btn").style.display = "none";
@@ -123,13 +114,13 @@ async function updateData() {
   const date = document.getElementById("date").value;
   const sales = document.getElementById("sales").value;
   const expenses = document.getElementById("expenses").value;
-
-  if (!editId) return alert("No entry selected for update.");
+  const remarks = document.getElementById("remarks").value;
+  const unpaidLaundry = document.getElementById("unpaid-laundry").checked;
 
   await fetch(`${API_URL}/api/data/${editId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ date, sales, expenses }),
+    body: JSON.stringify({ date, sales, expenses, remarks, unpaidLaundry })
   });
 
   document.getElementById("data-form").reset();

@@ -1,60 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Sales & Expenses Tracker</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Tracker</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Sales & Expenses Tracker</h1>
+  <h1>Sales Tracker</h1>
 
-  <!-- Form to Add/Edit Records -->
-  <form id="recordForm">
-    <input type="hidden" id="recordId">
-    <label>Date: <input type="date" id="date" required></label>
-    <label>Sales: <input type="number" id="sales" required></label>
-    <label>Expenses: <input type="number" id="expenses" required></label>
-    <button type="submit">Save Record</button>
-    <button type="button" id="cancelEdit" style="display:none;">Cancel</button>
+  <form id="data-form" onsubmit="event.preventDefault(); addData();">
+    <input type="date" id="date" required />
+    <input type="number" id="sales" placeholder="Sales" required />
+    <input type="number" id="expenses" placeholder="Expenses" required />
+    <input type="text" id="remarks" placeholder="Remarks (optional)" />
+    <label>
+      <input type="checkbox" id="unpaid-laundry" /> Unpaid Laundry
+    </label>
+    <button id="submit-btn" type="submit">Add</button>
+    <button id="update-btn" type="button" style="display: none" onclick="updateData()">Update</button>
   </form>
 
-  <!-- Date Filter -->
-  <div class="filters">
-    <label>Start: <input type="date" id="startDate"></label>
-    <label>End: <input type="date" id="endDate"></label>
-    <button onclick="fetchRecords()">Update Graph</button>
-  </div>
+  <div id="summary"></div>
 
-  <!-- Layout: Chart & Table -->
-  <div class="content">
-    <div class="chart-container">
-      <canvas id="lineChart"></canvas>
-    </div>
+  <div id="gauge" style="padding: 10px; margin: 10px 0; font-weight: bold;">Profit Status</div>
 
-    <div class="table-container">
-      <h2>Daily Records</h2>
-      <table id="recordTable">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Sales (₱)</th>
-            <th>Expenses (₱)</th>
-            <th>Profit (₱)</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+  <label for="sort-select">Sort by:</label>
+  <select id="sort-select" onchange="loadData()">
+    <option value="date">Date</option>
+    <option value="sales">Sales</option>
+    <option value="expenses">Expenses</option>
+    <option value="profit">Profit</option>
+  </select>
 
-      <!-- Summary -->
-      <div id="summary">
-        <p>Total Sales: ₱<span id="totalSales">0</span></p>
-        <p>Total Expenses: ₱<span id="totalExpenses">0</span></p>
-        <p>Profit: ₱<span id="profit">0</span></p>
-        <p>Average Sales: ₱<span id="averageSales">0</span></p>
-        <p>Average Expenses: ₱<span id="averageExpenses">0</span></p>
-      </div>
-    </div>
-  </div>
+  <canvas id="chart" width="400" height="200"></canvas>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Sales</th>
+        <th>Expenses</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="records"></tbody>
+  </table>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
