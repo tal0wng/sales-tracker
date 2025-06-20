@@ -1,12 +1,9 @@
-// model.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const recordSchema = new mongoose.Schema({
-  date: { type: Date, required: true },
+  date: String,
   sales: Number,
-  expenses: Number,
-  collectable: Boolean,
-  remarks: String
+  expenses: Number
 });
 
-module.exports = mongoose.model('Record', recordSchema);
+module.exports = mongoose.model("Record", recordSchema);
